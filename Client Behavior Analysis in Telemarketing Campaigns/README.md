@@ -1,7 +1,5 @@
 # Telemarketing Success Predictor
 
-## Chapter 1: Introduction
-
 ### Description of the Problem
 This project focuses on the effectiveness of telemarketing efforts aimed at selling long-term bank deposits. During each campaign, agents reach out to potential customers through outbound calls or, if customers contact the bank for other reasons, they are encouraged to subscribe to the product during those inbound interactions. The result is a binary outcome variable that indicates whether the interaction was successful (subscription) or unsuccessful (no subscription).
 
