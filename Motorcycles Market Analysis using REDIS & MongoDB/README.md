@@ -9,8 +9,8 @@ You will analyze data related to classified ads from the used motorcycles market
    - Follow straightforward installation processes.
 
 2. **Download Datasets**:
-   - **BIKES_DATASET.zip** from the provided Google Drive link.
-   - **RECORDED_ACTIONS.zip** from another link.
+   - Download the BIKES_DATASET.zip dataset from https://drive.google.com/open?id=1m4W6anTDphWRnHDwsh-hlexOGrAkMrSq
+   - Download the RECORDED_ACTIONS.zip dataset from https://drive.google.com/open?id=1wyL8nQKDEu6rdr9BH6CgBwGnPnvRT8cJ
 
 3. **Programming Language**:
    - You can use any programming language, but R is recommended, especially since sample code is provided in R.
