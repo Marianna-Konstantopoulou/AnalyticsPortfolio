@@ -1,0 +1,159 @@
+db.getCollection('Cleaned').find({})
+
+
+#Question 2.2
+db.getCollection('Cleaned').count({})
+
+#Question 2.3
+db.Cleaned.aggregate(
+     [ 
+        { 
+            "$match": {
+            "ad_data.Price" : {
+                "$exists": true
+                    }
+            }
+        },
+        {
+            "$group" : {
+            "_id" : null, 
+            "avg_price":{
+                "$avg": "$ad_data.Price"
+                },
+              "count":{
+                  "$sum":1
+                  }
+            }
+        }
+     ]
+)
+
+
+#Question 2.4
+        
+db.Cleaned.aggregate(
+[ { 
+            "$match": {
+            "ad_data.Price" : {
+                "$exists": true
+                    }
+            }
+        },
+  {
+    "$group" : {
+      "_id" : null, 
+      "max_price": {
+        "$max" : "$ad_data.Price"
+      }
+    }
+  }
+ ]
+)
+  
+db.Cleaned.aggregate(
+[ { 
+            "$match": {
+            "ad_data.Price" : {
+                "$exists": true
+                    }
+            }
+        },
+  {
+    "$group" : {
+      "_id" : null, 
+      "min_price": {
+        "$min" : "$ad_data.Price"
+      }
+    }
+  }
+ ]
+)
+
+
+
+
+#Question 2.5
+
+db.Cleaned.aggregate(
+    [
+        { "$match" : 
+                {"metadata.model": 
+		       {"$regex" : "Negotiable", 
+                        "$options" : "i"
+                       } 
+                }
+	    }, 
+		{"$group":
+		   {"_id": null,  
+                       "count": {
+                           "$sum" : 1
+                        }
+		}
+          }
+    ]
+)
+
+
+#################################################################
+
+
+
+
+#Question 2.7 (optional)
+      
+
+db.Cleaned.aggregate(
+     [
+        {
+          "$group": 
+              {"_id": "$metadata.brand", 
+              "Average_Price": {"$avg":"$ad_data.Price"}, 
+              "count": {"$sum": 1}}},
+        {
+          "$sort": 
+              {"Average_Price": -1}
+      },
+            {
+               "$limit": 1
+       }
+])
+
+#Question 2.8 (optional)
+       
+db.Cleaned.aggregate(
+       [{
+           "$group" : 
+            {"_id" : "$metadata.brand", 
+             "avg_age" : {"$avg" : {"$avg":"$Age"}},
+             "count" : {"$sum": 1}}},
+         {"$sort"  :
+                    {"avg_age" : -1}}, {"$limit" : 10}])     
+       
+       
+       
+#Question 2.9 (optional)
+      
+
+db.Cleaned.find({'extras': 'ABS'}).count()
+
+#Question 2.10 (optional)
+      
+
+db.Cleaned.aggregate(
+     [
+        {
+            "$match" : {
+                "extras" : "ABS",
+                "extras" : "Led lights",
+                "ad_data.Mileage" : {
+                    "$exists" : true
+                }
+            }
+        },
+        {
+
+          "$group": 
+              {"_id": null, 
+              "Average_Mileage": {"$avg":"$ad_data.Mileage"}, 
+              }
+}])
