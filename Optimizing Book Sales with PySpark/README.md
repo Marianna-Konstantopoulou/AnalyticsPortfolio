@@ -1,6 +1,6 @@
 # Background
 
-The assignment focuses on using Apache Spark, with a focus on PySpark, to analyze a dataset of book metadata and derive insights to optimize sales for a small bookstore company.
+You have been hired by a small bookstore company that wants to use data science techniques to optimize their sales. It has been assigned to you to analyse a dataset of books metadata using Apache Spark (and PySpark, in particular) to reveal useful insights. 
 
 ## Task 1 
 
