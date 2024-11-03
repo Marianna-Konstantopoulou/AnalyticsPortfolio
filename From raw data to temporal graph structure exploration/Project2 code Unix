@@ -1,0 +1,14 @@
+#### DBLP co-authorship graph
+
+#Unix code for filtering rows
+
+#Selecting the conferences requested
+grep -E ",CIKM,|,KDD,|,ICWSM,|,WWW,|,IEEE BigData," authors.csv > authors_conf.csv
+
+#Selecting the requested years
+awk -F, '$1>2015' authors_conf.csv > file1.csv
+
+#Changing the commas in 2nd and 4th columns, so that Python can identify the columns with the comma demiliter
+cat file1.csv | awk -F'"' '{gsub(",",";",$2); print}'> file2.csv
+
+cat file2.csv | awk -F'"' '{gsub(",",";",$4); print}'> authors_final3.csv
