@@ -1,0 +1,181 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// Project 2:Neo4j Graph database ///////////////////////////////////////////
+//////////////////////////////// Maria Zafeiropoulou P2822113 ///////////////////////////////////////////
+//////////////////////////// Marianna Konstantopoulou P2822122 //////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Loading the CSV files
+LOAD CSV WITH HEADERS FROM "file:///airlines.csv" AS LINE RETURN LINE limit 1
+LOAD CSV WITH HEADERS FROM "file:///airports.csv" AS LINE RETURN LINE limit 1
+LOAD CSV WITH HEADERS FROM "file:///routes.csv" AS LINE RETURN LINE limit 1
+
+//Create: All Nodes Indexes (unique constraint)
+CREATE CONSTRAINT ON (a:airport) ASSERT a.airportid IS UNIQUE;
+CREATE CONSTRAINT ON (a:airline) ASSERT a.airlineid IS UNIQUE;
+CREATE CONSTRAINT ON (r:route) ASSERT r.routeid IS UNIQUE;
+
+//Create: Airport nodes with properties
+LOAD CSV WITH HEADERS FROM "file:///airports.csv" AS line CREATE (a:airport{airportID: ToInteger(line.AirportID)}) 
+SET a.name = line.Name,
+a.country = line.Country,
+a.city = line.City,
+a.latitude = ToFloat(line.Latitude),
+a.longitude = ToFloat(line.Longitude),
+a.iata = line.IATA
+
+//Create: Airline nodes with properties
+LOAD CSV WITH HEADERS FROM "file:///airlines.csv" AS line CREATE (a:airline{airlineID: ToInteger(line.AirlineID)}) 
+SET a.name = line.Name, 
+a.country = line.Country
+
+//Create: Route nodes with properties
+LOAD CSV WITH HEADERS FROM "file:///routes.csv" AS line 
+CREATE (r:route{routeid: ToInteger(line.Routeid)}) 
+SET r.sourceID = ToInteger(line.SourceID),
+r.destinationID = ToInteger(line.DestinationID),
+r.equipment = ToString(line.Equipment),
+r.destination = line.Destination,
+r.source = line.Source,
+r.airlineID = line.AirlineID,
+r.stops = line.Stops
+
+//Create: Source relationship from airport to route
+LOAD CSV WITH HEADERS
+FROM "file:///airports.csv" AS line
+MATCH (airport:airport {iata: line.IATA })
+MATCH (route:route {source: line.IATA })
+CREATE (airport)-[:source]->(route)
+
+//Create: Destination relationship from route to airport
+LOAD CSV WITH HEADERS
+FROM "file:///airports.csv" AS line 
+MATCH (airport:airport {iata: line.IATA })
+MATCH (route:route {destination: line.IATA })
+CREATE (route)-[:destination]->(airport)
+
+//Create: Of relationship from route to airline
+LOAD CSV WITH HEADERS
+FROM "file:///routes.csv" AS line
+MATCH (airline:airline {airlineID: ToInteger(line.AirlineID) })
+MATCH (route:route {routeid: ToInteger(line.Routeid) })
+CREATE (route)-[:of]->(airline)
+
+//1) Which are the top 5 airports with the most flights. Return airport name and number of flights.
+MATCH (airport1: airport)-[:source]->(route1: route)
+MATCH (route2: route)-[:destination]->(airport1: airport)
+WITH count(distinct(route1.routeid)) AS In, count(distinct(route2.routeid)) AS Out, airport1.name AS Airport_Name
+RETURN Airport_Name, (In+Out) AS Number_of_routes
+ORDER BY Number_of_routes DESC
+LIMIT 5;
+
+//2) Which are the top 5 countries with the most airports. Return country name and number of airports.
+MATCH (airport)
+RETURN airport.country AS Country, COUNT(distinct airport.airportID) AS Number_Of_Airports
+ORDER BY Number_Of_Airports DESC
+LIMIT 5;
+
+//3) Which are the top 5 airlines with international flights from/to "Greece". Return airline name and number of flights.
+MATCH (airport1: airport)
+WHERE NOT airport1.country = 'Greece'
+MATCH (airport1:airport)-[:source]->(route1: route)
+MATCH (route1: route)-[:destination]->(airport2: airport {country: 'Greece'})
+MATCH (route1: route)-[:of]->(airline)
+MATCH (airport3: airport)
+WHERE NOT airport3.country = 'Greece'
+MATCH (a4:airport {country: 'Greece'})-[:source]->(route2: route)
+MATCH (route2: route)-[:destination]->(airport3: airport)
+MATCH (route2: route)-[:of]->(airline)
+WITH count(distinct(route1.routeid)) AS to_Greece, count(distinct(route2.routeid)) AS from_Greece, airline.name AS airline_Name
+RETURN airline_Name, (to_Greece+from_Greece) AS number_of_routes
+ORDER BY number_of_routes DESC
+LIMIT 5;
+
+
+//4) Which are the top 5 airlines with local flights inside ‘Germany’. Return airline name and number of flights.
+
+MATCH (airport1:airport {country:'Germany'})-[:source]->(route1: route)
+MATCH (route1: route)-[:destination]->(airport2:airport {country:'Germany'})
+MATCH (route1: route)-[:of]->(airline)
+RETURN airline.name AS Airline, COUNT(*) AS Flights
+ORDER BY Flights DESC
+LIMIT 5;
+
+
+//5) Which are the top 10 countries with flights to Greece. Return country name and number of flights.
+
+MATCH (airport1: airport)
+WHERE NOT airport1.country = 'Greece'
+MATCH (airport1:airport)-[:source]->(route1: route)
+MATCH (route1: route)-[:destination]->(a2: airport {country: 'Greece'})
+MATCH (route1: route)-[:of]->(airline)
+RETURN airport1.country as Country, COUNT(*) AS Flights
+ORDER BY Flights DESC
+LIMIT 10;
+
+
+//6) Find the percentage of air traffic (inbound and outbound) for every city in Greece. Return city name and the corresponding traffic percentage in descending order.
+
+CALL{MATCH (airport1: airport{country: 'Greece'})-[:source]->(route1: route)
+MATCH (route2: route)-[:destination]->(airport1)
+WITH count(distinct(route1.routeid)) AS Inb, count(distinct(route2.routeid)) AS Out
+RETURN (Inb+Out) AS Total}
+MATCH (airport1: airport{country: 'Greece'})-[:source]->(route1: route)
+MATCH (route2: route)-[:destination]->(airport1)
+WITH count(distinct(route1.routeid)) AS Inb1, count(distinct(route2.routeid)) AS Out1, Total,airport1.city AS City
+RETURN City, ROUND(((Inb1+Out1)*100.00)/Total,2) AS Traffic
+ORDER BY Traffic DESC;
+
+
+//7) Find the number of international flights to Greece with plane types ‘738’ and ‘320’. Return for each plane type the number of flights.
+
+MATCH (airport1: airport)
+WHERE NOT airport1.country = 'Greece'
+MATCH (route1 :route)
+WHERE route1.equipment = '738' OR route1.equipment = '320'
+MATCH (airport1: airport)-[:source]->(route1:route)
+MATCH (route1:route)-[:destination]->(airport2: airport {country: 'Greece'})
+MATCH (route1:route)-[:of]->(airline1: airline)
+RETURN route1.equipment AS Airplane_Type, COUNT(*) AS Flights
+ORDER BY Flights DESC;
+
+
+//8) Which are the top 5 flights that cover the biggest distance between two airports (use function point({ longitude: s1.longitude, latitude: s1.latitude }) and function
+distance(point1, point2)). Return From (airport), To (airport) and distance in km.
+
+
+MATCH (airport1: airport)-[:source]->(route1: route)
+MATCH (route1)-[:destination]->(airport2: airport)
+WITH airport1.name AS From, airport2.name AS To, ROUND(distance(point({ longitude: airport1.longitude, latitude: airport1.latitude }),point({ longitude: airport2.longitude, latitude: airport2.latitude })),4) AS Dist
+WHERE From < To
+RETURN  distinct From, To, Dist
+ORDER BY Dist DESC
+LIMIT 5;
+
+//9)  Find 5 cities that are not connected with direct flights to ‘Berlin’. Score the cities in descending order with the total number of flights to other destinations. 
+Return city name and score.
+
+CALL{
+MATCH (airport1: airport)-[:source]->(route1: route)
+MATCH (route1: route)-[:destination]->(airport2: airport{city:'Berlin'})
+WITH airport1.name AS air_name
+RETURN COLLECT(air_name) AS non_wanted_airports}
+MATCH (airport3: airport)
+WHERE NOT airport3.city = 'Berlin'
+MATCH (airport4:airport)
+WHERE NOT airport4.city = 'Berlin'
+MATCH (airport3)-[:source]->(route2:route)
+MATCH (route2)-[:destination]->(airport4)
+WHERE NOT airport3.name in non_wanted_airports
+WITH airport3.city as City, count(distinct(route2.routeid)) as Flights
+RETURN distinct City, Flights
+ORDER BY Flights DESC
+LIMIT 5;
+
+
+//10) Find all shortest paths from ‘Athens’ to ‘Sydney’. Use only relations between flights and city airports. (country?DIRECT FLIGHTS)
+
+MATCH (airport1: airport{country: 'Greece',city: 'Athens'}),
+(airport2:airport {country: 'Australia',city: 'Sydney'}),
+path=allshortestpaths( (airport1)-[*]->(airport2))
+RETURN path
+
