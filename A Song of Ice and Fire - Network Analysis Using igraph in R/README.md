@@ -1,42 +1,49 @@
-## Dataset Overview
+# Project 1: Network Analysis and Visualization with R and igraph
 
-This dataset represents character interaction networks from George R. R. Martin's *A Song of Ice and Fire* series. The edgelists capture connections between characters when their names (or nicknames) appear within 15 words of each other in the text. The weight of each edge corresponds to the number of interactions.
+## Problem
 
-## Analysis Themes
+### 1. 'A Song of Ice and Fire' Network
 
-- **R Programming**
-- **iGraph Package**
-- **Network Analysis**
-- **PageRank Algorithm**
+Your first task is to create an igraph graph using the network of the characters of 'A Song of Ice and Fire' by George R. R. Martin [1]. A `.csv` file with the list of edges of the network is available online [2]. You should download the file and use the columns `Source`, `Target`, and `Weight` to create an undirected weighted graph. For your convenience, you are free to make any transformations you think are appropriate to the file.
 
-## Project Summary
+### 2. Network Properties
 
-In this analysis, we examined the network of character interactions within *A Song of Ice and Fire*. Using a CSV file with network edges, we constructed an undirected, weighted graph in iGraph, using the columns *Source*, *Target*, and *Weight*. 
+Next, having created an igraph graph, you will explore its basic properties and write code to print:
 
-### Key Steps
+- Number of vertices
+- Number of edges
+- Diameter of the graph
+- Number of triangles
+- The top-10 characters of the network as far as their degree is concerned
+- The top-10 characters of the network as far as their weighted degree is concerned
 
-1. **Basic Network Properties**  
-   We calculated essential network properties, including:
-   - Number of vertices
-   - Number of edges
-   - Graph diameter
-   - Number of triangles
+### 3. Subgraph
 
-2. **Top Characters by Degree**  
-   We identified the Top 10 characters based on both degree and weighted degree.
+After that, your task is to plot the network:
 
-3. **Network Visualization**  
-   Using `plot()` and `rglplot()`, we visualized the entire network.
+You will first plot the entire network. Make sure you set the plot parameters appropriately to obtain an aesthetically pleasing result. For example, you can opt not to show the nodes' labels (`vertex.label = NA`) and set custom values for parameters like `edge.arrow.width` and `vertex.size`. Feel free to configure additional parameters that may improve your visualization results.
 
-4. **Subgraph Analysis**  
-   - We created a subgraph, retaining only vertices with 10 or more connections.
-   - Compared the edge density of this subgraph to the full graph.
+Then, you will create a subgraph of the network by discarding all vertices that have less than 10 connections in the network and plot the subgraph.
 
-5. **Centrality Measures**  
-   - Calculated the Top 15 characters based on **betweenness centrality** and **closeness centrality**.
-   - Compared Jon Snow’s rank within these metrics.
+In addition to the above plots, you are also asked to write code that calculates the edge density of the entire graph, as well as the aforementioned subgraph, and provide an explanation of the obtained results in a few sentences in your report.
 
-6. **PageRank**  
-   We implemented the PageRank algorithm to rank the characters and visualized the resulting network.
+### 4. Centrality
 
-This project provided insights into character prominence and interaction patterns, contributing to a deeper understanding of the narrative structure in *A Song of Ice and Fire*.
+Next, you will write code to calculate and print the top-15 nodes according to:
+
+- Closeness centrality
+- Betweenness centrality
+
+In addition, you are asked to find out where the character Jon Snow is ranked according to the above two measures and provide an explanation (a few sentences) of the observations you make after examining your results.
+
+### 5. Ranking and Visualization
+
+In the final step of this project, you are asked to rank the characters of the network with regard to their PageRank value.
+
+You will write code to calculate the PageRank values and create a plot of the graph that uses these values to appropriately set the nodes' size so that the nodes that are ranked higher are more evident.
+
+## References
+
+[1] A. Beveridge and J. Shan. Network of thrones. Math Horizons Magazine, 23(4):18–22, 2016.
+
+[2] [https://github.com/mathbeveridge/asoiaf/blob/master/data/asoiaf-all-edges.csv](https://github.com/mathbeveridge/asoiaf/blob/master/data/asoiaf-all-edges.csv)
